@@ -12,7 +12,7 @@ Explanation:
 - We can have all 3 projects into one .Net solution and at the time of build step using "**/*.csproj" It will build both the projects and run Test project on another task "TEST".
 - We can use "failTaskOnFailedTests: true" this configure in our TEST task step if any of the test is getting failed then pipeline is also going to failed.
 
-##3. The deployment of code and artifacts should be automated to Dev environment.
+## 3. The deployment of code and artifacts should be automated to Dev environment.
 
 Explanation:
 
