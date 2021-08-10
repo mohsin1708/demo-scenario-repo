@@ -1,0 +1,133 @@
+trigger:
+- master
+
+stages:
+  - stage: Build
+    jobs:
+      - job: BuilWebApp
+      pool:
+        vmImage: ''vs2017-win2016''
+
+      variables:
+        RestoreBuildProjects: '**/*.csproj'
+        TestProjects: '**/*[Tt]ests/*.csproj'
+        buildPlatform: 'Any CPU'
+        buildConfiguration: 'Release'
+        ArtifactName: 'DemoSampl'
+
+      steps:
+      - task: NuGetToolInstaller@1
+
+      - task: NuGetCommand@2
+        displayName: Restore
+          inputs:
+            command: 'restore'
+            projects: '$(RestoreBuildProjects)'
+
+
+      - task: VSBuild@1
+        displayName: Build
+        inputs:
+          projects: '$(RestoreBuildProjects)'
+          arguments: '--configuration $(BuildConfiguration)'
+
+      - task: VSTest@2
+        displayName: Test
+          inputs:
+            command: test
+            projects: '$(TestProjects)'
+            arguments: '--configuration $(BuildConfiguration)'
+            failTaskOnFailedTests: true
+
+       - task: DotNetCoreCLI@2
+          displayName: "Publish"
+          inputs:
+            command: 'publish'
+            publishWebProjects: true
+            arguments: '--configuration $(BuildConfiguration)
+                        --output $(Build.ArtifactStagingDirectory)'
+            zipAfterPublish: true
+
+      - task: PublishBuildArtifacts@1
+         displayName: 'Publish Artifact'
+         inputs:
+           PathtoPublish: '$(build.artifactstagingdirectory)'
+           ArtifactName: '$(ArtifactName)'
+
+  - stage: DeployDev
+    displayName: 'Deploy to Dev'
+    variables:
+      - group: 'Demo-Dev'
+    jobs:
+      - deployment:
+        pool:
+          vmimage: 'vs2017-win2016'
+          environment: 'Dev'
+    steps:
+      - task: DownloadBuildArtifactory@1
+        inputs:
+          buildType: 'current'
+          downloadType: 'single'
+          artifactName: 'DemoSampl'
+          downloadPath: '$(Systems.ArtifactDirectory)'
+
+
+      - task: AzureRmWebAppDeployment@4
+        inputs:
+          ConnectionType: 'AzureRM'
+          azureSubscription: '$(arm_subscription)'
+          appType: 'WebApp'
+          WebAppname: '$(arm_webApp)'
+          packageForLinux: '$(Systems.ArtifactDirectory)/DemoSampl/*.zip'
+
+  - stage: DeployQA
+    displayName: 'Deploy to QA'
+    variables:
+      - group: 'Demo-QA'
+    jobs:
+      - deployment:
+        pool:
+          vmimage: 'vs2017-win2016'
+          environment: 'QA'
+    steps:
+      - task: DownloadBuildArtifactory@1
+        inputs:
+          buildType: 'current'
+          downloadType: 'single'
+          artifactName: 'DemoSampl'
+          downloadPath: '$(Systems.ArtifactDirectory)'
+
+
+      - task: AzureRmWebAppDeployment@4
+        inputs:
+          ConnectionType: 'AzureRM'
+          azureSubscription: '$(arm_subscription)'
+          appType: 'WebApp'
+          WebAppname: '$(arm_webApp)'
+          packageForLinux: '$(Systems.ArtifactDirectory)/DemoSampl/*.zip'
+
+  - stage: DeployProd
+    displayName: 'Deploy to Prod'
+    variables:
+      - group: 'Demo-Prod'
+    jobs:
+      - deployment:
+        pool:
+          vmimage: 'vs2017-win2016'
+          environment: 'Prod'
+    steps:
+      - task: DownloadBuildArtifactory@1
+        inputs:
+          buildType: 'current'
+          downloadType: 'single'
+          artifactName: 'DemoSampl'
+          downloadPath: '$(Systems.ArtifactDirectory)'
+
+
+      - task: AzureRmWebAppDeployment@4
+        inputs:
+          ConnectionType: 'AzureRM'
+          azureSubscription: '$(arm_subscription)'
+          appType: 'WebApp'
+          WebAppname: '$(arm_webApp)'
+          packageForLinux: '$(Systems.ArtifactDirectory)/DemoSampl/*.zip'
