@@ -46,7 +46,7 @@ and store into Azure git repo.
 Terraform template.
 
 Explanation:
-I will use data source "azurerm_key_vault_secret" to get the store value in key vault.I will provide the secret key and vault URI
-to get the secret value of admin password and the same password I can use at VM creation configuration:
-like this (admin_password      = "${data.azurerm_key_vault_secret.test.value}).
-You can check in main.tf , I am using the same scenario.
+ - I will use data source "azurerm_key_vault_secret" to get the store value in key vault.
+ - I will provide the secret key and vault URI to get the secret value of admin password and the same password I can use at VM creation configuration:
+  like this (admin_password      = "${data.azurerm_key_vault_secret.test.value}).
+ - Kindly check in main.tf , I am using the same scenario.
