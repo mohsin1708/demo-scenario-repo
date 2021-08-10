@@ -9,6 +9,7 @@ Explanation:
 - Azure git repo where we can store Terraform template.
 - Visual studio or any text editor.
 - Terraform v-0.12 or can use latest  version v-0.14
+- Azure CLi to Generate Credentails for authentication.
 - Azure key vault service to store all secret_value
 
 
